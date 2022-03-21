@@ -51,6 +51,41 @@ impl LispObject {
             quoted: false,
         }
     }
+
+    pub fn symbol(name: &str) -> Self {
+        Self {
+            ltype: LispType::Symbol(name.into()),
+            quoted: false,
+        }
+    }
+
+    pub fn number(num: f64) -> Self {
+        Self {
+            ltype: LispType::Number(num),
+            quoted: false,
+        }
+    }
+
+    pub fn list(list: &[LispObject]) -> Self {
+        Self {
+            ltype: LispType::List(list.into()),
+            quoted: false,
+        }
+    }
+
+    pub fn cons(key: LispObject, val: LispObject) -> Self {
+        Self {
+            ltype: LispType::new_cons((key, val)),
+            quoted: false,
+        }
+    }
+
+    pub fn bool(b: bool) -> Self {
+        Self {
+            ltype: LispType::Bool(b),
+            quoted: false,
+        }
+    }
 }
 
 #[derive(PartialEq, PartialOrd, Debug, Clone)]
