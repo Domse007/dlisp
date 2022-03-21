@@ -3,6 +3,7 @@ use std::env;
 use config::Config;
 use lispobject::LispObject;
 
+mod ast;
 mod config;
 mod evaluator;
 mod functions;
