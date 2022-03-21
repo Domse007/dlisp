@@ -64,14 +64,11 @@ mod tests {
 
     #[test]
     fn test_eval_simple_built_in() {
-        let eval_obj = LispObject::new_with(
-            LispType::List(vec![
-                LispObject::new("add"),
-                LispObject::new("22"),
-                LispObject::new("33"),
-            ]),
-            false,
-        );
+        let eval_obj = LispObject::list(&[
+            LispObject::new("add"),
+            LispObject::new("22"),
+            LispObject::new("33"),
+        ]);
         let mut obj_manager = Manager::default();
         let res = eval(eval_obj, &mut obj_manager).unwrap();
 
@@ -80,21 +77,15 @@ mod tests {
 
     #[test]
     fn test_eval_recursive_built_in() {
-        let eval_obj = LispObject::new_with(
-            LispType::List(vec![
+        let eval_obj = LispObject::list(&[
+            LispObject::new("add"),
+            LispObject::list(&[
                 LispObject::new("add"),
-                LispObject::new_with(
-                    LispType::List(vec![
-                        LispObject::new("add"),
-                        LispObject::new("11"),
-                        LispObject::new("22"),
-                    ]),
-                    false,
-                ),
-                LispObject::new("33"),
+                LispObject::new("11"),
+                LispObject::new("22"),
             ]),
-            false,
-        );
+            LispObject::new("33"),
+        ]);
         let mut obj_manager = Manager::default();
         let res = eval(eval_obj, &mut obj_manager).unwrap();
 
@@ -103,14 +94,11 @@ mod tests {
 
     #[test]
     fn test_eval_multiple_passes_built_in() {
-        let eval_obj = LispObject::new_with(
-            LispType::List(vec![
-                LispObject::new("add"),
-                LispObject::new("22"),
-                LispObject::new("33"),
-            ]),
-            false,
-        );
+        let eval_obj = LispObject::list(&[
+            LispObject::new("add"),
+            LispObject::new("22"),
+            LispObject::new("33"),
+        ]);
         let mut obj_manager = Manager::default();
         let res = eval(eval_obj.clone(), &mut obj_manager).unwrap();
         assert_eq!(LispObject::new_with(LispType::Number(55.), false), res);

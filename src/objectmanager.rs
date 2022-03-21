@@ -114,27 +114,9 @@ mod tests {
 
     fn test_frame_default() -> Frame {
         let mut frame = Frame::default();
-        frame.push(
-            cons(&[
-                LispObject::new_with(LispType::Symbol(String::from("test")), false),
-                LispObject::new_with(LispType::Number(22.), false),
-            ])
-            .unwrap(),
-        );
-        frame.push(
-            cons(&[
-                LispObject::new_with(LispType::Symbol(String::from("other-var")), false),
-                LispObject::new_with(LispType::Bool(true), false),
-            ])
-            .unwrap(),
-        );
-        frame.push(
-            cons(&[
-                LispObject::new_with(LispType::Symbol(String::from("another-one")), false),
-                LispObject::new_with(LispType::Number(23.), false),
-            ])
-            .unwrap(),
-        );
+        frame.push(cons(&[LispObject::symbol("test"), LispObject::number(22.)]).unwrap());
+        frame.push(cons(&[LispObject::symbol("other-var"), LispObject::bool(true)]).unwrap());
+        frame.push(cons(&[LispObject::symbol("another-one"), LispObject::number(23.)]).unwrap());
         frame
     }
 
@@ -142,10 +124,7 @@ mod tests {
     fn test_frame_get_val() {
         let frame = test_frame_default();
         if let LispType::Bool(var) = frame
-            .get_val(LispObject::new_with(
-                LispType::Symbol(String::from("other-var")),
-                false,
-            ))
+            .get_val(LispObject::symbol("other-var"))
             .unwrap()
             .get_type()
         {
@@ -155,10 +134,7 @@ mod tests {
         }
 
         if let LispType::Number(n) = frame
-            .get_val(LispObject::new_with(
-                LispType::Symbol(String::from("another-one")),
-                false,
-            ))
+            .get_val(LispObject::symbol("another-one"))
             .unwrap()
             .get_type()
         {
@@ -171,16 +147,10 @@ mod tests {
     #[test]
     fn test_frame_set_val_existing() {
         let mut frame = test_frame_default();
-        frame.set_val(
-            LispObject::new_with(LispType::Symbol(String::from("other-var")), false),
-            LispObject::new_with(LispType::Bool(true), false),
-        );
+        frame.set_val(LispObject::symbol("other-var"), LispObject::bool(true));
 
         if let LispType::Bool(b) = frame
-            .get_val(LispObject::new_with(
-                LispType::Symbol(String::from("other-var")),
-                false,
-            ))
+            .get_val(LispObject::symbol("other-var"))
             .unwrap()
             .get_type()
         {
@@ -197,10 +167,7 @@ mod tests {
         manager.set_val(LispObject::symbol("test"), LispObject::nil());
         manager.set_val(LispObject::symbol("other"), LispObject::nil());
         manager.new_frame();
-        manager.set_val(
-            LispObject::symbol("second"),
-            LispObject::new_with(LispType::Number(1.), false),
-        );
+        manager.set_val(LispObject::symbol("second"), LispObject::number(1.));
         assert_eq!(
             manager.get_val(LispObject::symbol("other")).unwrap(),
             LispObject::nil()
