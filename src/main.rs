@@ -1,10 +1,14 @@
+#![allow(dead_code)]
 use std::env;
 
 use config::Config;
+use evaluator::eval;
 use lispobject::LispObject;
+use objectmanager::Manager;
 
 mod ast;
 mod config;
+mod error;
 mod evaluator;
 mod functions;
 mod lispobject;
@@ -14,7 +18,16 @@ fn main() {
     let args = env::args().skip(1).collect::<Vec<String>>();
     let (cmds, lisp) = sort_input(&args);
     let config = Config::new(cmds);
-    let _lisp = LispObject::new_list(&lisp, config.eval_input);
+    // convert the strings to lispobjects
+    let lisp = LispObject::new_list(&lisp, config.eval_input);
+    // Instantiate the objectmanager
+    let mut manager = Manager::default();
+    // Convert the args to an instruction, that the interpreter can understand
+    let instr = LispObject::list(&[LispObject::symbol("setq"), LispObject::symbol("argv"), lisp]);
+
+    if eval(instr, &mut manager).is_err() {
+        std::process::exit(-1);
+    }
 }
 
 fn sort_input(args: &[String]) -> (Vec<String>, Vec<String>) {

@@ -52,9 +52,9 @@ impl LispObject {
         }
     }
 
-    pub fn symbol(name: &str) -> Self {
+    pub fn symbol<T: ToString>(name: T) -> Self {
         Self {
-            ltype: LispType::Symbol(name.into()),
+            ltype: LispType::Symbol(name.to_string()),
             quoted: false,
         }
     }
@@ -88,6 +88,16 @@ impl LispObject {
     }
 }
 
+impl ToString for LispObject {
+    fn to_string(&self) -> String {
+        if self.quoted {
+            format!("'{}", self.ltype.to_string())
+        } else {
+            self.ltype.to_string()
+        }
+    }
+}
+
 #[derive(PartialEq, PartialOrd, Debug, Clone)]
 pub enum LispType {
     Number(f64),
@@ -112,6 +122,33 @@ impl LispType {
 
     pub fn new_cons(pair: (LispObject, LispObject)) -> Self {
         Self::Cons(Box::new(pair))
+    }
+}
+
+impl ToString for LispType {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Number(n) => n.to_string(),
+            Self::Symbol(s) => s.to_string(),
+            Self::List(l) => {
+                let mut s = "(".to_string();
+                for o in l {
+                    s.push_str(o.to_string().as_str());
+                    s.push(' ');
+                }
+                s.pop();
+                s.push(')');
+                s
+            }
+            Self::Cons(c) => format!("({} {})", c.0.to_string(), c.1.to_string()),
+            Self::Bool(b) => {
+                if *b {
+                    "t".to_string()
+                } else {
+                    "nil".to_string()
+                }
+            }
+        }
     }
 }
 
@@ -140,5 +177,23 @@ fn test_lisptype() {
     ];
     for (test, res) in tests {
         assert_eq!(LispType::new(test), res);
+    }
+}
+
+#[test]
+fn test_lisptype_to_string() {
+    let tests = [
+        (LispObject::bool(true), "t"),
+        (
+            LispObject::cons(LispObject::nil(), LispObject::symbol("test")),
+            "(nil test)",
+        ),
+        (
+            LispObject::list(&[LispObject::nil(), LispObject::number(2.)]),
+            "(nil 2.)",
+        ),
+    ];
+    for (test, exp) in tests {
+        assert_eq!(test.to_string(), exp.to_string());
     }
 }

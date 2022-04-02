@@ -15,10 +15,7 @@ pub fn cons(args: &[LispObject]) -> Result<LispObject, &'static str> {
         _ => return Err("Not enough arguments."),
     };
 
-    Ok(LispObject::new_with(
-        LispType::new_cons((first, second)),
-        false,
-    ))
+    Ok(LispObject::cons(first, second))
 }
 
 pub fn list(args: &[LispObject]) -> Result<LispObject, &'static str> {

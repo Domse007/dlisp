@@ -40,6 +40,7 @@ impl Manager {
         if let Some(frame) = self.frames.last_mut() {
             return frame.set_val_force(key, value);
         }
+        //dbg!(&self);
 
         None
     }
@@ -56,12 +57,10 @@ impl Frame {
     }
 
     pub fn get_val(&self, name: LispObject) -> Option<LispObject> {
-        let mut var_name: String = String::new();
-
-        match name.get_type() {
-            LispType::Symbol(s) => var_name = s,
+        let var_name = match name.get_type() {
+            LispType::Symbol(s) => s,
             _ => return None,
-        }
+        };
 
         for obj in self.scoped_objects.iter() {
             if let LispType::Cons(pair) = obj.get_type() {
@@ -77,12 +76,10 @@ impl Frame {
     }
 
     pub fn set_val(&mut self, name: LispObject, new: LispObject) -> Option<()> {
-        let mut var_name = String::new();
-
-        match name.get_type() {
-            LispType::Symbol(s) => var_name = s,
+        let var_name = match name.get_type() {
+            LispType::Symbol(s) => s,
             _ => return None,
-        }
+        };
 
         for obj in self.scoped_objects.iter_mut() {
             if let LispType::Cons(pair) = obj.get_type() {
