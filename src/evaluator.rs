@@ -1,103 +1,51 @@
-use std::slice::Iter;
-
-use crate::{
-    functions::call_builtin,
-    lispobject::{LispObject, LispType},
-    objectmanager::Manager,
-};
+use crate::functions::call_builtin;
+use crate::lispobject::{LispObject, LispType};
+use crate::objectmanager::Manager;
 
 pub fn eval(eval_obj: LispObject, obj_manager: &mut Manager) -> Result<LispObject, &'static str> {
-    // If it is quoted, return early. There is nothing to be done.
     if eval_obj.is_quoted() {
         return Ok(eval_obj);
     }
-
-    // Get a new frame for scoping.
     obj_manager.new_frame();
 
-    // Check if the to be evaled object is a list.
-    let ret_val: Result<LispObject, &'static str> =
-        if let LispType::List(list) = eval_obj.get_type() {
-            dbg!(&list);
-            eval_list(eval_obj, list, obj_manager)
-        } else {
-            Ok(eval_obj)
-        };
+    let mut ret_obj = Err("");
+
+    match eval_obj.get_type() {
+        LispType::List(list) => {
+            if let LispType::Symbol(sym) = list.first().unwrap().get_type() {
+                let mut args = vec![];
+                for arg in list.iter().skip(1) {
+                    let arg = eval(arg.clone(), obj_manager)?;
+                    args.push(match obj_manager.get_val(arg.clone()) {
+                        Some(val) => val,
+                        None => arg.clone(),
+                    });
+                }
+                dbg!(&sym);
+                dbg!(&args);
+                ret_obj = match sym.as_str() {
+                    "progn" => {
+                        obj_manager.new_frame();
+                        let mut ret = Err("");
+                        for arg in args {
+                            ret = eval(arg, obj_manager);
+                        }
+                        obj_manager.pop_frame();
+                        ret
+                    }
+                    "setq" => {
+                        obj_manager.set_val(args[0].clone(), args[1].clone());
+                        Ok(LispObject::nil())
+                    }
+                    _ => call_builtin(sym.as_str(), &args),
+                };
+            }
+        }
+        _ => ret_obj = Ok(eval_obj),
+    }
 
     obj_manager.pop_frame();
-    ret_val
-}
-
-/// Wrapper function to evaluate lists.
-fn eval_list(
-    eval_obj: LispObject,
-    list: Vec<LispObject>,
-    obj_manager: &mut Manager,
-) -> Result<LispObject, &'static str> {
-    let mut ret_val = Err("Could not process list.");
-    let mut list = list.iter();
-    if let Some(obj) = list.next() {
-        // Check if the first element is a symbol, otherwise error.
-        if let LispType::Symbol(sym) = obj.get_type() {
-            let args = replace_var_with_val(list, obj_manager)?;
-            // Check if it's a special form. Otherwise, eval normally.
-            ret_val = check_run_special_form(sym, args, obj_manager);
-        } else if let LispType::List(int_list) = obj.get_type() {
-            for elem in int_list {
-                ret_val = eval(elem, obj_manager);
-            }
-        } else if let LispType::Symbol(_) = obj.get_type() {
-            return match obj_manager.get_val(obj.clone()) {
-                Some(val) => Ok(val),
-                None => Err("Value could not be found."),
-            };
-        } else {
-            //ret_val = Err("Invalid Syntax. Non quoted list must start with a symbol.")
-            ret_val = Ok(eval_obj);
-        }
-    } else {
-        ret_val = Ok(LispObject::nil());
-    }
-    ret_val
-}
-
-/// Check if the symbol is a special form and evaluate it.
-fn check_run_special_form(
-    symbol: String,
-    args: Vec<LispObject>,
-    obj_manager: &mut Manager,
-) -> Result<LispObject, &'static str> {
-    let mut args = args.iter();
-    match symbol.as_str() {
-        "setq" => {
-            obj_manager.set_val(args.next().unwrap().clone(), args.next().unwrap().clone());
-            Ok(LispObject::nil())
-        }
-        _ => call_builtin(&symbol, &args.cloned().collect::<Vec<LispObject>>()),
-    }
-}
-
-fn replace_var_with_val(
-    list: Iter<LispObject>,
-    obj_manager: &mut Manager,
-) -> Result<Vec<LispObject>, &'static str> {
-    // Recursively eval its parameters.
-    // Also replace the unquoted symbols with values. => Variables
-    let mut args = vec![];
-    for arg in list {
-        let evaluated = eval(arg.clone(), obj_manager)?;
-        if !evaluated.is_quoted() {
-            if let LispType::Symbol(_) = evaluated.get_type() {
-                // eval the returned lispobject
-                args.push(eval(obj_manager.get_val(evaluated).unwrap(), obj_manager)?);
-            } else {
-                args.push(evaluated);
-            }
-        } else {
-            args.push(evaluated);
-        }
-    }
-    Ok(args)
+    ret_obj
 }
 
 #[cfg(test)]
@@ -151,6 +99,7 @@ mod tests {
     #[test]
     fn test_eval_setq() {
         let test = LispObject::list(&[
+            LispObject::symbol("progn"),
             LispObject::list(&[
                 LispObject::symbol("setq"),
                 LispObject::symbol("test"),
@@ -166,6 +115,7 @@ mod tests {
     #[test]
     fn test_eval_var_lookup() {
         let eval_obj = LispObject::list(&[
+            LispObject::symbol("progn"),
             LispObject::list(&[
                 LispObject::symbol("setq"),
                 LispObject::symbol("test"),
