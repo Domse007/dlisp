@@ -1,3 +1,5 @@
+use std::fs;
+
 pub struct Config {
     pub eval_input: bool,
     pub ignore_lisp_input: bool,
@@ -23,5 +25,12 @@ impl Config {
             ignore_lisp_input,
             file,
         }
+    }
+
+    pub fn get_file_string(&self) -> Option<String> {
+        if self.file.is_some() {
+            return Some(fs::read_to_string(self.file.as_ref().unwrap()).unwrap());
+        }
+        None
     }
 }

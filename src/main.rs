@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 use std::env;
 
+use ast::ast;
 use config::Config;
 use evaluator::eval;
 use lispobject::LispObject;
@@ -23,10 +24,23 @@ fn main() {
     // Instantiate the objectmanager
     let mut manager = Manager::default();
     // Convert the args to an instruction, that the interpreter can understand
-    let instr = LispObject::list(&[LispObject::symbol("setq"), LispObject::symbol("argv"), lisp]);
+    let instr = LispObject::list(&[
+        LispObject::symbol("set"),
+        LispObject::symbol("argv").move_quoted(),
+        lisp.move_quoted(),
+    ]);
 
-    if eval(instr, &mut manager).is_err() {
+    let res = eval(instr, &mut manager);
+    if res.is_err() {
+        eprintln!("[ERROR] {}", res.unwrap_err());
         std::process::exit(-1);
+    }
+
+    if let Some(code) = config.get_file_string() {
+        let ast = ast(code.as_str()).unwrap();
+        for block in ast {
+            eval(block, &mut manager).unwrap();
+        }
     }
 }
 

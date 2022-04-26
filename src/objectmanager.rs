@@ -40,7 +40,6 @@ impl Manager {
         if let Some(frame) = self.frames.last_mut() {
             return frame.set_val_force(key, value);
         }
-        //dbg!(&self);
 
         None
     }
@@ -71,7 +70,6 @@ impl Frame {
                 }
             }
         }
-
         None
     }
 
