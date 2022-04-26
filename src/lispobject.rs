@@ -174,34 +174,37 @@ impl ToString for LispType {
         }
     }
 }
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-fn test_lispobject() {
-    let tests = [
-        ("'test", LispType::Symbol("test".to_string()), true),
-        ("'12", LispType::Number(12.), true),
-        ("33", LispType::Number(33.), false),
-        ("test", LispType::Symbol("test".to_string()), false),
-    ];
+    #[test]
+    fn test_lispobject() {
+        let tests = [
+            ("'test", LispType::Symbol("test".to_string()), true),
+            ("'12", LispType::Number(12.), true),
+            ("33", LispType::Number(33.), false),
+            ("test", LispType::Symbol("test".to_string()), false),
+        ];
 
-    for (test, exp, q) in tests {
-        let res = LispObject::new(test);
-        assert_eq!(res.get_type(), exp);
-        assert_eq!(res.is_quoted(), q);
+        for (test, exp, q) in tests {
+            let res = LispObject::new(test);
+            assert_eq!(res.get_type(), exp);
+            assert_eq!(res.is_quoted(), q);
+        }
     }
-}
 
-#[test]
-fn test_lisptype() {
-    let tests = [
-        ("33.3", LispType::Number(33.3)),
-        ("5", LispType::Number(5.)),
-        ("lisp", LispType::Symbol("lisp".to_string())),
-    ];
-    for (test, res) in tests {
-        assert_eq!(LispType::new(test), res);
+    #[test]
+    fn test_lisptype() {
+        let tests = [
+            ("33.3", LispType::Number(33.3)),
+            ("5", LispType::Number(5.)),
+            ("lisp", LispType::Symbol("lisp".to_string())),
+        ];
+        for (test, res) in tests {
+            assert_eq!(LispType::new(test), res);
+        }
     }
-}
 
 #[test]
 fn test_lisptype_to_string() {
