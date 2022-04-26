@@ -37,8 +37,31 @@ impl LispObject {
         self.ltype.clone()
     }
 
+    pub fn get_string(&self) -> String {
+        match self.get_type() {
+            LispType::Number(n) => n.to_string(),
+            LispType::Symbol(s) => s,
+            LispType::Cons(c) => format!("({} . {})", c.0.get_string(), c.1.get_string()),
+            LispType::List(l) => {
+                format!(
+                    "({})",
+                    l.iter()
+                        .map(|e| e.get_string())
+                        .collect::<Vec<String>>()
+                        .join(" ")
+                )
+            }
+            LispType::Bool(b) => if b { "t" } else { "nil" }.to_string(),
+        }
+    }
+
     pub fn set_quoted(&mut self) {
         self.quoted = true;
+    }
+
+    pub fn move_quoted(mut self) -> Self {
+        self.quoted = true;
+        self
     }
 
     pub fn new_with(ltype: LispType, quoted: bool) -> Self {
@@ -189,8 +212,8 @@ fn test_lisptype_to_string() {
             "(nil test)",
         ),
         (
-            LispObject::list(&[LispObject::nil(), LispObject::number(2.)]),
-            "(nil 2.)",
+            LispObject::list(&[LispObject::nil(), LispObject::number(2.1)]),
+            "(nil 2.1)",
         ),
     ];
     for (test, exp) in tests {

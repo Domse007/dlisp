@@ -5,6 +5,7 @@ pub fn call_builtin(fn_name: &str, args: &[LispObject]) -> Result<LispObject, &'
         "cons" => cons(args),
         "list" => list(args),
         "add" | "+" => add(args),
+        "print" => print(args),
         _ => Err("No built in function with that name."),
     }
 }
@@ -41,13 +42,22 @@ pub fn print(args: &[LispObject]) -> Result<LispObject, &'static str> {
         None => return Err("Not enough arguments."),
     };
 
-    match msg.get_type() {
-        LispType::Number(n) => print!("{}", n),
-        LispType::Symbol(s) => print!("{}", s),
-        LispType::List(l) => print!("{:?}", l),
-        LispType::Cons(c) => print!("{:?}", c),
-        LispType::Bool(b) => print!("{}", if b { "t" } else { "nil" }),
-    }
+    println!("{}", msg.get_string());
 
     Ok(LispObject::nil())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_add() {
+        assert_eq!(
+            add(&[LispObject::number(33.), LispObject::number(22.)])
+                .unwrap()
+                .get_type(),
+            LispType::Number(55.)
+        );
+    }
 }
