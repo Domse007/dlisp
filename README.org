@@ -1,0 +1,31 @@
+* dlisp
+Dlisp is a not very standard lisp implementation. Dlisp is implemented
+in Rust and uses no unsafe blocks.
+
+#+begin_src lisp
+(set (quote first-var) 420)
+(set (quote second-var) (+ first-var 69))
+(print second-var)
+#+end_src
+
+As seen in this example, the syntax is very barebones and does not
+support convenience features like singlequotes for symbols or dots for
+cons cells.
+
+* Flags
+The flags that are given to the program are automatically split into
+lisp code and flags for the lisp environment.
+
+A file can be read with the =-f= flag.
+
+* Building
+The Project can be run with the following commands:
+
+#+begin_src 
+$ git clone https://www.github.com/domse007/dlisp
+$ cargo build --release
+$ ./target/release/dlisp -f dlisp/out.dl
+#+end_src
+
+* License
+This Project is licensed under the GPLv3 license.
