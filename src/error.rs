@@ -1,9 +1,5 @@
-use std::{
-    error::Error,
-    fmt::{Display, Error as FmtError, Formatter},
-};
-
-use crate::lispobject::LispObject;
+use std::error::Error;
+use std::fmt::{Display, Error as FmtError, Formatter};
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 struct LispError {
