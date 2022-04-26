@@ -1,0 +1,3 @@
+(set (quote first-var) 420)
+(set (quote second-var) (+ first-var 69))
+(print second-var)
