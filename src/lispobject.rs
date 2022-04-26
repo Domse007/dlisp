@@ -206,20 +206,21 @@ mod tests {
         }
     }
 
-#[test]
-fn test_lisptype_to_string() {
-    let tests = [
-        (LispObject::bool(true), "t"),
-        (
-            LispObject::cons(LispObject::nil(), LispObject::symbol("test")),
-            "(nil test)",
-        ),
-        (
-            LispObject::list(&[LispObject::nil(), LispObject::number(2.1)]),
-            "(nil 2.1)",
-        ),
-    ];
-    for (test, exp) in tests {
-        assert_eq!(test.to_string(), exp.to_string());
+    #[test]
+    fn test_lisptype_to_string() {
+        let tests = [
+            (LispObject::bool(true), "t"),
+            (
+                LispObject::cons(LispObject::nil(), LispObject::symbol("test")),
+                "(nil test)",
+            ),
+            (
+                LispObject::list(&[LispObject::nil(), LispObject::number(2.1)]),
+                "(nil 2.1)",
+            ),
+        ];
+        for (test, exp) in tests {
+            assert_eq!(test.to_string(), exp.to_string());
+        }
     }
 }
