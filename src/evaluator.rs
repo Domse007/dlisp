@@ -29,7 +29,7 @@ fn eval_list(list: Vec<LispObject>, manager: &mut Manager) -> Result<LispObject,
     }
 
     let mut parameters = vec![];
-    for element in list.clone() {
+    for element in list {
         parameters.push(eval(element, manager)?);
     }
 
