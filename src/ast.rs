@@ -1,4 +1,3 @@
-
 use crate::lispobject::{LispObject, LispType};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -16,7 +15,7 @@ impl WorkingLispObject {
     }
 
     fn merge(&mut self, obj: Self) -> Result<(), Self> {
-        if self.finished == false {
+        if !self.finished {
             self.objects.push(obj.into());
             return Ok(());
         }
@@ -32,19 +31,24 @@ impl WorkingLispObject {
     }
 }
 
-impl Into<LispObject> for WorkingLispObject {
-    fn into(self) -> LispObject {
-        LispObject::new_with(LispType::List(self.objects), false)
+impl From<WorkingLispObject> for LispObject {
+    fn from(this: WorkingLispObject) -> Self {
+        if this.objects.is_empty() {
+            LispObject::nil()
+        } else {
+            LispObject::new_with(LispType::List(this.objects), false)
+        }
     }
 }
 
 pub fn ast(code: &str) -> Result<Vec<LispObject>, &'static str> {
     let tokens = code
-        .replace("(", " ( ")
-        .replace(")", " ) ")
-        .split(" ")
+        .replace('(', " ( ")
+        .replace(')', " ) ")
+        .split(' ')
         .map(|e| e.to_string())
         .filter(|x| !x.is_empty())
+        .filter(|x| !x.contains('\n'))
         .collect::<Vec<String>>();
 
     let mut stack: Vec<WorkingLispObject> = vec![];

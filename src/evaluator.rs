@@ -19,6 +19,15 @@ pub fn eval(obj: LispObject, manager: &mut Manager) -> Result<LispObject, &'stat
 
 fn eval_list(list: Vec<LispObject>, manager: &mut Manager) -> Result<LispObject, &'static str> {
     manager.new_frame();
+
+    match list[0].get_type() {
+        LispType::Symbol(s) if s == "defun" => {
+            create_defun(manager, list);
+            return Ok(LispObject::nil());
+        }
+        _ => {}
+    }
+
     let mut parameters = vec![];
     for element in list.clone() {
         parameters.push(eval(element, manager)?);
@@ -41,8 +50,15 @@ fn eval_list(list: Vec<LispObject>, manager: &mut Manager) -> Result<LispObject,
             }
         },
         LispType::List(_) => eval(parameters[0].clone(), manager),
-        _ => Err("First element must be a symbol."),
+        _ => Ok(parameters[0].clone()),
     }
+}
+
+fn create_defun(manager: &mut Manager, parameter: Vec<LispObject>) {
+    manager.set_val(
+        parameter[1].clone().move_quoted(),
+        LispObject::list(&parameter[3..]),
+    );
 }
 
 #[cfg(test)]
