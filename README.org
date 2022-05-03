@@ -10,7 +10,20 @@ in Rust and uses no unsafe blocks.
 
 As seen in this example, the syntax is very barebones and does not
 support convenience features like singlequotes for symbols or dots for
-cons cells.
+cons cells. 
+
+#+begin_src lisp
+(defun test-2 ()
+   (set (quote other) (+ 6 5))
+   (print (+ (quote other) 2)))
+
+(defun test ()
+   (set (quote this) 12)
+   (test-2)
+   (print (quote this)))
+
+(test)
+#+end_src
 
 * Flags
 The flags that are given to the program are automatically split into
@@ -21,10 +34,17 @@ A file can be read with the =-f= flag.
 * Building
 The Project can be run with the following commands:
 
-#+begin_src 
+#+begin_src sh
 $ git clone https://www.github.com/domse007/dlisp
+$ cd dlisp
 $ cargo build --release
 $ ./target/release/dlisp -f dlisp/out.dl
+#+end_src
+
+The tests can be run with the following command:
+
+#+begin_src sh
+$ cargo test
 #+end_src
 
 * License

@@ -1,0 +1,10 @@
+(defun test-2 ()
+   (set (quote other) (+ 6 5))
+   (print (+ (quote other) 2)))
+
+(defun test ()
+   (set (quote this) 12)
+   (test-2)
+   (print (quote this)))
+
+(test)
