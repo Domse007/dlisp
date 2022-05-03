@@ -1,0 +1,129 @@
+% Created 2022-05-03 Tue 21:02
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage[germanb]{babel}
+\usepackage{mhchem}
+\author{Dominik Keller, G4a}
+\date{}
+\title{Rückblick}
+\hypersetup{
+ pdfauthor={Dominik Keller, G4a},
+ pdftitle={Rückblick},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 29.0.50 (Org mode 9.5.2)}, 
+ pdflang={Germanb}}
+\begin{document}
+
+\maketitle
+
+\section{Produkt}
+\label{sec:orgfc212af}
+Das Produkt ist auf Github gehostet und unter dieser URL erreichbar:
+\href{https://www.github.com/domse007/dlisp}{https://www.github.com/domse007/dlisp}. Das finale Produkt befindet
+sich auf dem \texttt{master} Branch.
+
+\section{Anforderungen}
+\label{sec:org97351aa}
+\noindent
+Das Ziel ist es eine möglichst vollständigen Lisp Core implementierung zu schreiben. Dieser Umfasst das Generieren eines AST und die anschliessende Ausführung des Trees. Core soll bedeuten, dass die wichtigsten Lisp Funktionen verfügbar sind, welche alle in Rust geschrieben sind. Das bedeutet, es soll keine Standard Library entstehen.\\
+
+\noindent
+Der Evaluator soll Variablen unterstützen, weshalb dieser auch Special Forms unterstützen musss. Special Forms ist ein Sammelbegriff für interne Funktionen, die aussehen wie Lisp Funktionen, aber keine sind.\\
+
+\noindent
+Die Implementierung soll ohne externe Crates kompilierbar sein. Zudem soll das ganze Crate ohne unsicherer (Note: \texttt{unsafe} Keyword) Code geschrieben werden.
+
+\section{Implementierung}
+\label{sec:orgbc15bbc}
+\noindent
+Die Lisp Implementierung funktioniert in den meisten Fällen. Es gibt
+allerdings noch einige Probleme. Das grösste ist sicherlich, dass es
+keinen Macro Support gibt.
+
+\subsection{Eval}
+\label{sec:orge6a9af2}
+\noindent
+Eval ist eine Rust Funktion, welche sich rekursiv aufruft und nach und
+nach alles auflöst, bis sie \textbf{einen} Rückgabewert produziert hat. Das
+erste, was eine Funktion überprüft ist, ob die Eingabe gequoted ist.
+Gequoted heisst, dass der Rückgabewert dem Eingabewert ist und somit
+die Daten nicht verändert werden. Danach wird der Typ des \texttt{LispObjects}
+überprüft. Wenn es ein Symbol ist, wird überprüft ob der Manager eine
+Variable besitzt. Falls ja, wird das \texttt{Symbol} mit dem Wert ersetzt.
+Interessant wird es bei einer liste. Listen sind, wenn sie nicht
+gequoted sind, Funktionsaufrufe, wobei das erste Element der
+Funktionsname und der Rest die Argumente für die Funktion sind. Für
+die Ausführung muss allerdings überprüft werden, auf welchem Level die
+Funktion defininiert wurde:
+\begin{enumerate}
+\item \texttt{Rust Core}: Funktionen wie Additionen und Subtraktionen sind in Rust
+implementiert und verhalten sich wie Funktionen die in Lisp
+geschrieben sind.
+\item \texttt{Special Forms}: Gewisse Funktionen können nicht in der standard
+Lisp Funktionsweise definiert werden. Diese fallen unter die
+Special Forms. Auch diese müssen in Rust geschrieben werden. Die
+Folgenden Special Forms wurden implementiert:
+\begin{enumerate}
+\item \texttt{defun}: Defun definiert eine Funktion. Diese wird im Manager als
+Key-Value Pair gespeichert, wobei der Key der Funktionsname ist
+und der Body die Value.
+\item \texttt{set}: Set nutzt den manager und setzt ein Key-Value Pair. Für
+diese Operation wird der Manager genutzt, welcher für normale
+Funktionen nicht zur Verfügung steht.
+\item \texttt{quote}: Diese Special Form setzt das \texttt{Quoteflag}.
+\end{enumerate}
+\item \texttt{Lisp Funktionen}: Diese Funktionen werden durch \texttt{defun} gesetzt. Und
+genau da ist der Fehler, denn defun müsste keine special Forms
+sein, sondern im besten Fall ein Makro. In der aktuellen
+Implementierung funktioniert es mehrheitlich. Der Rückgabewert
+einer Funktion ist dabei das Resultat des letzten \texttt{eval} Aufrufs.
+Probleme gibt es zur Zeit noch bei den Parmatern. Diese sind aus
+zeitlichen Gründen noch nicht implementiert.
+\end{enumerate}
+
+\section{Rückblick}
+\label{sec:org5853dc5}
+\noindent
+Es war vom Zeitaufwand, vor allem in dieser Zeit, ein doch viel
+stressigeres Projekt, als ich anfangs angenommen habe. Schlussendlich
+habe ich die letzten Bugs in den letzten Stunden vor der Abgabe
+beheben können, weshalb ich nicht ausführöich testen konnte, ob es
+Bedingungen gibt (und wenn ja wieviele?), auf die der Interpreter
+aufgibt.\\
+
+\noindent
+Zudem hatte ich nicht die Zeit um die Errors umzustellen. Begonnen
+habe ich mit \texttt{\&'static str} als Error Typ, denn diese sind schnell
+geschrieben und trotzdem hilfreich beim Debuggen. In einem weiteren
+Schritt würde es darum gehen auf \texttt{LispError} umzusteigen, denn der
+sollte für den Nutzer deutlich aufschlussreicher sein, denn er erlaubt
+es mehr Informationen zu speichern und ausgeben.\\
+
+\noindent
+Das Projekt nutzt zudem keine \texttt{unsafe} Codeblöcke. Das wenn im nächsten
+Schritt das Error Handling finalisiert wird, kann das Programm nicht
+mehr abstürzen.\\
+
+\noindent
+Schlussendlich bin ich aber ziemlich zufrieden mit der
+Implementierung, denn ich habe alles ohne externe Tutorials oder
+anderen Resourcen entwickelt. Alles was ich brauchte war \texttt{Emacs} mit
+\texttt{lsp-mode} als Interface für \texttt{rust-analyzer} und den Compiler für Tipps
+und Fehler.\\
+
+\noindent
+Abschliessend heisst das, dass alle am Anfang definierten Punkte
+erfüllt wurden.\\
+\end{document}

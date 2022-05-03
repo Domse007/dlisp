@@ -1,0 +1,15 @@
+#+title: Building Review
+The review can be built with Emacs and some sort of latex compiler.
+
+Open the file with emacs with the following Command:
+
+#+begin_src sh
+$ emacs review.org
+#+end_src
+
+With the following Key sequence, the org transpiler will be invoked
+and if =pdflatex= is present in the path, it will create and open the
+final pdf: =<Ctrl>+<c> <Ctrl>-<e> <l> <o>= or in emacs notation: =C-c
+C-e l o=.
+
+Org-mode is part of the standard emacs distribution.
